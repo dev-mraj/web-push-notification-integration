@@ -1,0 +1,215 @@
+
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="Meghraj Choudhary">
+
+    <title>Admin For Push Notifications</title>
+
+
+</head>
+
+<body class="bg-light">
+
+<div class="container">
+    <div class="py-5 text-center">
+        <h2>Send Push Notification</h2>
+        <p class="lead">Below is form to send push notifications to {number} subscribers.</p>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <h4 class="mb-3"></h4>
+            <form class="needs-validation" method="post" novalidate id="form">
+                <div class="row">
+                    <div class="col-md-12">
+                        <label for="title">Title</label>
+                        <input type="text" class="form-control" id="title" name="title" placeholder="" value="" required>
+                        <div class="invalid-feedback">
+                            Valid title is required.
+                        </div>
+                    </div>
+
+                    <div class="col-md-12">
+                        <label for="body">Description</label>
+                        <textarea type="text" class="form-control" id="body" name="notification[body]" placeholder="" value="" required style="height: 120px;"></textarea>
+                        <div class="invalid-feedback">
+                            Valid Description is required.
+                        </div>
+                    </div>
+
+                    <div class="col-md-12">
+                        <label for="body">URL</label>
+                        <input type="url" class="form-control" id="url" name="url" placeholder="" value=""  />
+                        <div class="invalid-feedback">
+                            Valid url is required.
+                        </div>
+                    </div>
+
+
+                    <div class="col-md-12">
+                        <label for="body">Icon URL (192x192 px)</label>
+                        <input type="text" class="form-control" id="icon" name="notification[icon]" placeholder="" value="" >
+                    </div>
+
+                    <div class="col-md-12">
+                        <label for="body">Image URL (360x180 px)</label>
+                        <input type="text" class="form-control" id="image" name="notification[image]" placeholder="" value="" >
+                    </div>
+                    <div class="col-md-12">
+                        <label for="body">Badge URL (72x72 px)</label>
+                        <input type="text" class="form-control" id="badge" name="notification[badge]" placeholder="" value="" >
+                    </div>
+
+                    <input type="hidden" id="preview" name="preview" placeholder="" value="" >
+                </div>
+                <hr class="mb-4">
+                <div class="row">
+                    <div class="col-md-6">
+                        <button class="btn btn-default btn-lg btn-block " type="button" onclick="submitForm('preview')">PREVIEW</button>
+
+                    </div>
+                    <div class="col-md-6 pull-right text-right">
+                        <button class="btn btn-primary btn-lg btn-block" type="button" onclick="submitForm('send')">SEND</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <footer class="my-5 pt-5 text-muted text-center text-small">
+        <p class="mb-1">&copy; 2017-2018 <a href="http://deskiz.com">Deskiz</a></p>
+    </footer>
+
+
+
+    <!-- Bootstrap core CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+
+    <script>
+        // Example starter JavaScript for disabling form submissions if there are invalid fields
+        (function() {
+            'use strict';
+
+            window.addEventListener('load', function() {
+                // Fetch all the forms we want to apply custom Bootstrap validation styles to
+                var forms = document.getElementsByClassName('needs-validation');
+
+                // Loop over them and prevent submission
+                var validation = Array.prototype.filter.call(forms, function(form) {
+                    form.addEventListener('submit', function(event) {
+                        if (form.checkValidity() === false) {
+                            event.preventDefault();
+                            event.stopPropagation();
+                        }
+                        form.classList.add('was-validated');
+                    }, false);
+                });
+            }, false);
+        })();
+
+
+        var APP_PUBLIC_KEY='YOUR_PUBLIC_KEY';
+        var isPushNotificationSupported=function(){
+            return 'serviceWorker' in navigator && 'PushManager' in window;
+        };
+        var urlB64ToUint8Array=function(base64String) {
+            var padding = '='.repeat((4 - base64String.length % 4) % 4);
+            var base64 = (base64String + padding)
+                .replace(/\-/g, '+')
+                .replace(/_/g, '/');
+
+            var rawData = window.atob(base64);
+            var outputArray = new Uint8Array(rawData.length);
+
+            for (var i = 0; i < rawData.length; ++i) {
+                outputArray[i] = rawData.charCodeAt(i);
+            }
+            return outputArray;
+        };
+
+        function get_subscription_self(callback) {
+            if(isPushNotificationSupported()){
+                console.log('Service Worker and Push is supported');
+                navigator.serviceWorker.register('./../sw.js').then(function(sw) {
+                    console.log('Service Worker is registered', sw);
+
+                    sw.pushManager.getSubscription().then(function(subscription) {
+                        if (subscription !== null) {
+                            console.log('User is already subscribed.');
+                            callback(JSON.stringify(subscription));
+                            // depending on your application logic you can use this current subscription value again.
+                        } else {
+                            const applicationServerKey = urlB64ToUint8Array(APP_PUBLIC_KEY);
+                            sw.pushManager.subscribe({
+                                userVisibleOnly: true,
+                                applicationServerKey: applicationServerKey
+                            }).then(function(subscription) {
+                                console.log('User is subscribed now.');
+                                callback(JSON.stringify(subscription));
+                            })
+                            .catch(function(err) {
+                                console.error('Failed to subscribe the user: ', err);
+                                callback(null);
+                            });
+                        }
+                    }).catch(function(error){
+                        console.error('Service Worker getSubscription Error');
+                        console.error(error);
+                        callback(null);
+                    });
+                }).catch(function(error) {
+                    console.error('Service Worker Error');
+                    console.error(error);
+                    callback(null);
+                });
+            } else {
+                console.warn('Push messaging is not supported');
+                callback(null);
+            }
+        }
+
+        function submitForm(type){
+            let form =document.getElementById('form');
+            if (form.checkValidity() === true) {
+
+                get_subscription_self((subscription)=>{
+                    if(type=='preview' && !subscription)
+                        return alert("There is an error, can't get push token.");
+
+                    document.getElementById('preview').value=type=='preview'?subscription:'';
+
+                    var http = new XMLHttpRequest();
+                    http.open('POST', './send', true);
+                    http.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+
+                    http.onreadystatechange = function() {
+                        if(http.readyState == 4 ) {
+                            if (http.status == 200)
+                                alert(http.responseText);
+                            else alert("Server Error");
+                        }
+                    };
+
+                    let data = '';
+                    for(var pair of new FormData(form).entries()){
+                        if(typeof pair[1]=='string'){
+                            data += (data?'&':'') + (encodeURIComponent(pair[0]).replace(/%20/g,'+'))+'='+encodeURIComponent(pair[1]).replace(/%20/g,'+');
+                        }
+                    }
+                    http.send(data);
+
+                });
+            }
+        }
+    </script>
+</div>
+
+</body>
+</html>

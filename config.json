@@ -1,0 +1,18 @@
+{
+    "secert": "little secret",
+    "admin": {
+        "user": "admin",
+        "password_hash": "1825348b349f57fbb435b0bf375c5f39e5d3a7c7e211a340abc0d26e170c6d0b"
+    },
+    "db": {
+        "host": "",
+        "user": "",
+        "password": "",
+        "database": ""
+    },
+    "notifications": {
+        "email": "",
+        "public_key": "",
+        "private_key": ""
+    }
+}

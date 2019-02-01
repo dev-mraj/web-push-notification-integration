@@ -1,0 +1,20 @@
+{
+  "name": "web-push-notification-integration-sample",
+  "version": "1.0.0",
+  "description": "Deskiz - Web Push Notification Integration [Easiest Guide] - Read full article here https://deskiz.com/blog/web-push-notifications-integration-anywhere-easiest-guide",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "author": "Meghraj Choudhary",
+  "license": "MIT",
+  "dependencies": {
+    "async": "^2.6.1",
+    "body-parser": "^1.18.3",
+    "express": "^4.16.4",
+    "http-auth": "^3.2.3",
+    "mysql": "^2.16.0",
+    "web-push": "^3.3.3"
+  }
+}
